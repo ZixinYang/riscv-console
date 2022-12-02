@@ -1,15 +1,18 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "api.h"
+// #include "api.h"
 #define SMALL_SPRITE_CTRL_OFFSET 16
+#define CONTROLLER      (*((volatile uint32_t *)0x40000018))
 
 int checkAlive(int cur_x, int cur_y, int budget);
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget);
 void initSpriteControllers(void);
 void initSpriteData(void);
 void drawPellet(void);
+int genRandom(int high);
 
+volatile uint32_t *MODE_CTRL_REG = (volatile uint32_t *)(0x500FF414);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 volatile char *VIDEO_MEMORY = (volatile char *)(0x500FE800);
@@ -20,11 +23,12 @@ int main() {
     int last_global = 42;
     initSpriteControllers();
     initSpriteData();
-    setGraphicsMode();
+    *MODE_CTRL_REG |= 0x1;
     // Set color to sprite palette
-    setColor(0, 0, 0x8000A65F);
-    setColor(0, 1, 0x80FFFFFF);
-    setColor(0, 2, 0x80000000);
+    volatile uint32_t *SPRITE_PALETTE = (volatile uint32_t *)(0x500FD000 + 1024 * 0);
+    SPRITE_PALETTE[0] = 0x8000A65F;
+    SPRITE_PALETTE[1] = 0x80FFFFFF;
+    SPRITE_PALETTE[2] = 0x80000000;
     int pellet_x = 100;
     int pellet_y = 100;
     int center_x = pellet_x + 4;
@@ -32,7 +36,7 @@ int main() {
     int step_size = 3;
     
     drawPellet();
-    SMALL_SPRITE_CONTROLS[0][0] = calcSmallSpriteControl(pellet_x,pellet_y,8,8,0);
+    SMALL_SPRITE_CONTROLS[0][0] = ((8-1)<<25) | ((8-1)<<21) | ((pellet_y+16)<<12) | ((pellet_x+16)<<2) | 0;
 
     int control_idx = 1;
     int cur_x = 0;
@@ -45,7 +49,7 @@ int main() {
     while (alive == 1) {
         global = getTicks();
         if(global != last_global){
-            controller_status = getStatus();
+            controller_status = CONTROLLER;
             if (controller_status == 0x0){
                 current_status = last_status;
             }
@@ -88,13 +92,13 @@ int main() {
                 budget += 3;
                 pellet_x = genRandom(512);
                 pellet_y = genRandom(288);
-                SMALL_SPRITE_CONTROLS[0][0] = calcSmallSpriteControl(pellet_x,pellet_y,8,8,0);
+                SMALL_SPRITE_CONTROLS[0][0] = ((8-1)<<25) | ((8-1)<<21) | ((pellet_y+16)<<12) | ((pellet_x+16)<<2) | 0;
                 center_x = pellet_x + 4;
                 center_y = pellet_y + 4;
             }
 
             alive = checkAlive(cur_x, cur_y, budget);
-            *SMALL_SPRITE_CONTROLS[control_idx] = calcSmallSpriteControl(cur_x, cur_y, 6, 6, 0);
+            *SMALL_SPRITE_CONTROLS[control_idx] = ((6-1)<<25) | ((6-1)<<21) | ((cur_y+16)<<12) | ((cur_x+16)<<2) | 0;
             control_idx++;
             if (control_idx == budget){
                 control_idx = 1;
@@ -103,23 +107,28 @@ int main() {
             last_status = current_status;
         }
     }
-    setTextMode();
-    char *ptr = malloc(12);
-    ptr[0] = 'G';
-    ptr[1] = 'A';
-    ptr[2] = 'M';
-    ptr[3] = 'E';
-    ptr[4] = ' ';
-    ptr[5] = 'O';
-    ptr[6] = 'V';
-    ptr[7] = 'E';
-    ptr[8] = 'R';
-    ptr[9] = '!';
-    ptr[10] = '!';
-    ptr[11] = '!';
-    ptr[12] = '\0';
-    strcpy(VIDEO_MEMORY, ptr);
+    *MODE_CTRL_REG &= 0x0;
+    VIDEO_MEMORY[0] = 'G';
+    VIDEO_MEMORY[1] = 'A';
+    VIDEO_MEMORY[2] = 'M';
+    VIDEO_MEMORY[3] = 'E';
+    VIDEO_MEMORY[4] = ' ';
+    VIDEO_MEMORY[5] = 'O';
+    VIDEO_MEMORY[6] = 'V';
+    VIDEO_MEMORY[7] = 'E';
+    VIDEO_MEMORY[8] = 'R';
+    VIDEO_MEMORY[9] = '!';
+    VIDEO_MEMORY[10] = '!';
+    VIDEO_MEMORY[11] = '!';
+    VIDEO_MEMORY[12] = '\0';
     return 0;
+}
+
+int genRandom(int high)
+{
+    static unsigned long int next = 1;
+    next = ((next * 214013L + 2531011L) >> 16) & 0x7fff;
+    return next % high;
 }
 
 int checkAlive(int cur_x, int cur_y, int budget){
