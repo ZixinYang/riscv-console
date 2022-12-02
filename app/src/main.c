@@ -23,7 +23,7 @@ int main() {
     int last_global = 42;
     initSpriteControllers();
     initSpriteData();
-    *MODE_CTRL_REG |= 0x1;
+    MODE_CTRL_REG[0] = 1;
     // Set color to sprite palette
     volatile uint32_t *SPRITE_PALETTE = (volatile uint32_t *)(0x500FD000 + 1024 * 0);
     SPRITE_PALETTE[0] = 0x8000A65F;
@@ -107,7 +107,7 @@ int main() {
             last_status = current_status;
         }
     }
-    *MODE_CTRL_REG &= 0x0;
+    MODE_CTRL_REG[0] = 0;
     VIDEO_MEMORY[0] = 'G';
     VIDEO_MEMORY[1] = 'A';
     VIDEO_MEMORY[2] = 'M';
