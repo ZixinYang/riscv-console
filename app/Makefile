@@ -27,14 +27,17 @@ endif
 LDFILE   = riscv32-console.ld
 INCLUDE  += -I $(INC_DIR)
 CFLAGS   += -ffreestanding  -nostartfiles
-LDFLAGS  +=
+LDFLAGS  += -lc
 LDFLAGS  += -Wl,--gc-sections -Wl,-T,$(LDFILE)
 
-TARGET_NAME = riscv-console-cartridge
+TARGET_NAME = group-1-cartridge-baseline
 
 TARGET_OBJS =   $(OBJ_DIR)/main.o               \
                 $(OBJ_DIR)/crt0.o               \
-				$(OBJ_DIR)/memory.o             \
+				$(OBJ_DIR)/printf.o               \
+				$(OBJ_DIR)/workarounds.o               \
+				$(OBJ_DIR)/video_api.o               \
+				$(OBJ_DIR)/thread_api.o               \
                 $(OBJ_DIR)/startup.o
 
 all: directories $(BIN_DIR)/$(TARGET_NAME)
