@@ -123,6 +123,7 @@ int main() {
     VIDEO_MEMORY[10] = '!';
     VIDEO_MEMORY[11] = '!';
     VIDEO_MEMORY[12] = '\0';
+    while(1);
     return 0;
 }
 
