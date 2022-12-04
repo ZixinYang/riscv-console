@@ -11,7 +11,6 @@
 int checkAlive(int cur_x, int cur_y, int budget);
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget);
 void initSpriteControllers(void);
-void initSpriteData(void);
 void drawPellet(void);
 int genRandom(int high);
 void getCoordinates(int idx, int* x, int* y);
@@ -24,7 +23,6 @@ volatile uint8_t *SMALL_SPRITE_DATAS[128];
 
 int main() {
     int last_global = 42;
-    initSpriteData();
     setDisplayMode(DISPLAY_MODE_GRAPHICS);
     // Set color to sprite palette
     volatile uint32_t SPRITE_PALETTE[3];
@@ -139,24 +137,20 @@ int checkAlive(int cur_x, int cur_y, int budget){
 }
 
 void getCoordinates(int idx, int* x, int* y){
-    x = ((*SMALL_SPRITE_CONTROLS[idx] >> 2) & 0x3FF) - SMALL_SPRITE_CTRL_OFFSET;
-    y = ((*SMALL_SPRITE_CONTROLS[idx] >> 12) & 0x1FF) - SMALL_SPRITE_CTRL_OFFSET;
+    *x = ((*SMALL_SPRITE_CONTROLS[idx] >> 2) & 0x3FF) - SMALL_SPRITE_CTRL_OFFSET;
+    *y = ((*SMALL_SPRITE_CONTROLS[idx] >> 12) & 0x1FF) - SMALL_SPRITE_CTRL_OFFSET;
 }
 
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget){
     return (cur_x < center_x + 10) & (cur_y < center_y + 10) & (cur_x > center_x - 10) & (cur_y > center_y - 10) & (budget <= 129);
 }
 
-void initSpriteData(){
-    for (int i = 0; i < 128; i++){
-        SMALL_SPRITE_DATAS[i] = (volatile uint8_t *)(0x50000000 + 0xF4000 + i * 256);
-    }
-}
-
 void drawPellet(){
-    for(int y = 0; y < 16; y++){
-        for(int x = 0; x < 16; x++){
-            SMALL_SPRITE_DATAS[0][(y<<4) + x] = ((x >= 3) & (x <= 5) & (y >= 0) & (y <= 8)) | ((x >= 2) & (x <= 6) & (y >= 3) & (y <= 5)) ? 1 : 2;
+    uint8_t sprite_img[16 * 16];
+    for(int x = 0; x < 16; x++){
+        for(int y = 0; y < 16; y++){   
+            sprite_img[(y<<4) + x] = ((x >= 3) & (x <= 5) & (y >= 0) & (y <= 8)) | ((x >= 2) & (x <= 6) & (y >= 3) & (y <= 5)) ? 1 : 2;
         }
     }
+    setSmallSpriteDataImage(0, sprite_img);
 }
