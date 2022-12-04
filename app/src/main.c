@@ -9,6 +9,7 @@ int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget)
 void initSpriteControllers(void);
 void initSpriteData(void);
 void drawPellet(void);
+void getCoordinates(int idx, int* x, int* y);
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
@@ -125,8 +126,7 @@ int checkAlive(int cur_x, int cur_y, int budget){
     int x, y;
     if (cur_x != 0){
         for (int i = 1; i < budget; i++){
-            x = ((*SMALL_SPRITE_CONTROLS[i] >> 2) & 0x3FF) - SMALL_SPRITE_CTRL_OFFSET;
-            y = ((*SMALL_SPRITE_CONTROLS[i] >> 12) & 0x1FF) - SMALL_SPRITE_CTRL_OFFSET;
+            getCoordinates(i, &x, &y);
             if (x == cur_x & y == cur_y){
                 alive = 0;
                 break;
@@ -134,6 +134,11 @@ int checkAlive(int cur_x, int cur_y, int budget){
         }
     }
     return alive;
+}
+
+void getCoordinates(int idx, int* x, int* y){
+    x = ((*SMALL_SPRITE_CONTROLS[idx] >> 2) & 0x3FF) - SMALL_SPRITE_CTRL_OFFSET;
+    y = ((*SMALL_SPRITE_CONTROLS[idx] >> 12) & 0x1FF) - SMALL_SPRITE_CTRL_OFFSET;
 }
 
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget){
