@@ -49,6 +49,7 @@ void shiftLargeSpriteControl(int sprite_id, uint32_t x, uint32_t y);
 void setGraphicsMode(void);
 void setTextMode(void);
 void setColor(int palette_id, int entry_id, uint32_t rgba);
+void setBackgroundColor(int palette_id, int entry_id, uint32_t rgba);
 void initSpriteControllers();
 uint32_t getSmallSpriteControl(int sprite_id);
 uint32_t getLargeSpriteControl(int sprite_id);
@@ -157,6 +158,9 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     else if (call == 17){
         printLine((char*)a0);
     }
+    else if (call == 18){
+        setBackgroundColor(a0, a1, a2);
+    }
     return -1;
 }
 
@@ -240,5 +244,10 @@ void setTextMode(){
 
 void setColor(int palette_id, int entry_id, uint32_t rgba){
     volatile uint32_t *SPRITE_PALETTE = (volatile uint32_t *)(0x500FD000 + 1024 * palette_id);
+    SPRITE_PALETTE[entry_id] = rgba;
+}
+
+void setBackgroundColor(int palette_id, int entry_id, uint32_t rgba){
+    volatile uint32_t *SPRITE_PALETTE = (volatile uint32_t *)(0x500FC000 + 1024 * palette_id);
     SPRITE_PALETTE[entry_id] = rgba;
 }

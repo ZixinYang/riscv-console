@@ -11,6 +11,7 @@ void drawPellet(void);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 volatile uint8_t *small_sprite_data = (volatile uint8_t *)(0x500F4000);
+volatile uint32_t *background_sprite_control = (volatile uint32_t *)(0x500FF100);
 
 int main() {
     int last_global = 42;
@@ -18,7 +19,10 @@ int main() {
     // Set color to sprite palette
     setColor(0, 0, 0x8000A65F);
     setColor(0, 1, 0x80FFFFFF);
-    setColor(0, 2, 0x80000000);
+    setColor(0, 2, 0xFFC19A6B);
+    setBackgroundColor(0, 0, 0x80C19A6B);
+    setBackgroundSpriteControl(0, calcBackgroundControl(0,0,0,0));
+
     int pellet_x = 100;
     int pellet_y = 100;
     int center_x = pellet_x + 4;
@@ -26,7 +30,7 @@ int main() {
     int step_size = 3;
     
     drawPellet();
-    setSmallSpriteControl(0, calcSmallSpriteControl(pellet_x,pellet_y,8,8,0));
+    setSmallSpriteControl(0, calcSmallSpriteControl(100,100,8,8,0));
 
     int control_idx = 1;
     int cur_x = 0;

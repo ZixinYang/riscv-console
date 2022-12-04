@@ -19,7 +19,7 @@ _start:
 .global getTicks, getStatus, genRandom, setGraphicsMode, setTextMode, setColor, calcSmallSpriteControl, calcLargeSpriteControl, calcBackgroundControl
 .global setSmallSpriteControl, setLargeSpriteControl, setBackgroundSpriteControl, shiftSmallSpriteControl, shiftLargeSpriteControl, 
 .global getSmallSpriteControl, getLargeSpriteControl, getBackgroundSpriteControl
-.global printLine
+.global printLine, setBackgroundColor
 getTicks:
     li a5, 0
     ecall
@@ -73,6 +73,9 @@ getBackgroundSpriteControl:
     ecall
 printLine:
     li a5, 17
+    ecall
+setBackgroundColor:
+    li a5, 18
     ecall
 .end
 
