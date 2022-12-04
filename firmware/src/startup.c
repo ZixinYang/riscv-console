@@ -46,14 +46,10 @@ void setLargeSpriteControl(int sprite_id, uint32_t addr);
 void setBackgroundSpriteControl(int sprite_id, uint32_t addr);
 void shiftSmallSpriteControl(int sprite_id, uint32_t x, uint32_t y);
 void shiftLargeSpriteControl(int sprite_id, uint32_t x, uint32_t y);
-void setSmallSpriteData(int sprite_id, int loc, int entry_id);
-void setLargeSpriteData(int sprite_id, int loc, int entry_id);
-void setBackgroundSpriteData(int sprite_id, int loc, int entry_id);
 void setGraphicsMode(void);
 void setTextMode(void);
 void setColor(int palette_id, int entry_id, uint32_t rgba);
 void initSpriteControllers();
-void initSpriteDatas();
 uint32_t getSmallSpriteControl(int sprite_id);
 uint32_t getLargeSpriteControl(int sprite_id);
 uint32_t getBackgroundSpriteControl(int sprite_id);
@@ -69,9 +65,6 @@ volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
 volatile uint32_t *SMALL_SPRITE_CONTROLS[128];
 volatile uint32_t *LARGE_SPRITE_CONTROLS[64];
 volatile uint32_t *BACKGROUND_SPRITE_CONTROLS[5];
-volatile uint8_t *SMALL_SPRITE_DATAS[128];
-volatile uint8_t *LARGE_SPRITE_DATAS[64];
-volatile uint8_t *BACKGROUND_SPRITE_DATAS[5];
 volatile char *VIDEO_MEMORY = (volatile char *)(0x500FE800);
 
 
@@ -103,7 +96,6 @@ void c_interrupt_handler(uint32_t mcause){
     global++;
     controller_status = CONTROLLER;
     initSpriteControllers();
-    initSpriteDatas();
 }
 
 uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t call){
@@ -162,7 +154,7 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     else if (call == 16){
         return getBackgroundSpriteControl(a0);
     }
-    else if (call == 20){
+    else if (call == 17){
         printLine((char*)a0);
     }
     return -1;
@@ -198,18 +190,6 @@ void initSpriteControllers(){
     }
 }
 
-void initSpriteDatas(){
-    for (int i = 0; i < 128; i++){
-        SMALL_SPRITE_DATAS[i] = (volatile uint8_t *)(0x500F4000 + i * 256);
-    }
-    for (int i = 0; i < 64; i++){
-        LARGE_SPRITE_DATAS[i] = (volatile uint8_t *)(0x500B4000 + i * 4 * 1024);
-    }
-    for (int i = 0; i < 5; i++){
-        BACKGROUND_SPRITE_DATAS[i] = (volatile uint8_t *)(0x50000000 + i * 144 * 1024);
-    }
-}
-
 void setSmallSpriteControl(int sprite_id, uint32_t addr){
     *SMALL_SPRITE_CONTROLS[sprite_id] = addr;
 }
@@ -220,18 +200,6 @@ void setLargeSpriteControl(int sprite_id, uint32_t addr){
 
 void setBackgroundSpriteControl(int sprite_id, uint32_t addr){
     *BACKGROUND_SPRITE_CONTROLS[sprite_id] = addr;
-}
-
-void setSmallSpriteData(int sprite_id, int loc, int entry_id){
-    SMALL_SPRITE_DATAS[sprite_id][loc] = entry_id;
-}
-
-void setLargeSpriteData(int sprite_id, int loc, int entry_id){
-    LARGE_SPRITE_DATAS[sprite_id][loc] = entry_id;
-}
-
-void setBackgroundSpriteData(int sprite_id, int loc, int entry_id){
-    BACKGROUND_SPRITE_DATAS[sprite_id][loc] = entry_id;
 }
 
 void shiftSmallSpriteControl(int sprite_id, uint32_t x, uint32_t y){
