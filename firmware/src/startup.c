@@ -41,11 +41,24 @@ int rand(int high);
 uint32_t calcSmallSpriteControl(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t p);
 uint32_t calcLargeSpriteControl(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t p);
 uint32_t calcBackgroundControl(uint32_t x, uint32_t y, uint32_t z, uint32_t p);
+void setSmallSpriteControl(int sprite_id, uint32_t addr);
+void setLargeSpriteControl(int sprite_id, uint32_t addr);
+void shiftSmallSpriteControl(int sprite_id, uint32_t x, uint32_t y);
+void shiftLargeSpriteControl(int sprite_id, uint32_t x, uint32_t y);
 void setGraphicsMode(void);
 void setTextMode(void);
 void setColor(int palette_id, int entry_id, uint32_t rgba);
+void initSpriteControllers();
 
 static unsigned long int next = 1;
+
+extern volatile int global;
+extern volatile uint32_t controller_status;
+volatile uint32_t *INT_PEND_REG = (volatile uint32_t *)(0x40000004);
+volatile uint32_t *MODE_CTRL_REG = (volatile uint32_t *)(0x500FF414);
+volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
+volatile uint32_t *SMALL_SPRITE_CONTROLS[128];
+volatile uint32_t *LARGE_SPRITE_CONTROLS[128];
 
 void init(void){
     uint8_t *Source = _erodata;
@@ -67,12 +80,6 @@ void init(void){
     MTIMECMP_HIGH = 0;
 }
 
-extern volatile int global;
-extern volatile uint32_t controller_status;
-volatile uint32_t *INT_PEND_REG = (volatile uint32_t *)(0x40000004);
-volatile uint32_t *MODE_CTRL_REG = (volatile uint32_t *)(0x500FF414);
-volatile uint32_t *INT_ENABLE_REG = (volatile uint32_t *)(0x40000000);
-
 void c_interrupt_handler(uint32_t mcause){
     uint64_t NewCompare = (((uint64_t)MTIMECMP_HIGH)<<32) | MTIMECMP_LOW;
     NewCompare += 100;
@@ -80,6 +87,7 @@ void c_interrupt_handler(uint32_t mcause){
     MTIMECMP_LOW = NewCompare;
     global++;
     controller_status = CONTROLLER;
+    initSpriteControllers();
 }
 
 uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t call){
@@ -114,7 +122,44 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
         uint32_t r = calcBackgroundControl(a0, a1, a2, a3);
         return r;
     }
+    else if (call == 9){
+        setSmallSpriteControl(a0, a1);
+    }
+    else if (call == 10){
+        setLargeSpriteControl(a0, a1);
+    }
+    else if (call == 11){
+        shiftSmallSpriteControl(a0, a1, a2);
+    }
+    else if (call == 12){
+        shiftLargeSpriteControl(a0, a1, a2);
+    }
     return -1;
+}
+
+void initSpriteControllers(){
+    for (int i = 0; i < 128; i++){
+        SMALL_SPRITE_CONTROLS[i] = (volatile uint32_t *)(0x500FF214 + i * 4);
+        LARGE_SPRITE_CONTROLS[i] = (volatile uint32_t *)(0x500FF114 + i * 4);
+    }
+}
+
+void setSmallSpriteControl(int sprite_id, uint32_t addr){
+    *SMALL_SPRITE_CONTROLS[sprite_id] = addr;
+}
+
+void setLargeSpriteControl(int sprite_id, uint32_t addr){
+    *LARGE_SPRITE_CONTROLS[sprite_id] = addr;
+}
+
+void shiftSmallSpriteControl(int sprite_id, uint32_t x, uint32_t y){
+    *SMALL_SPRITE_CONTROLS[sprite_id] &= 0xFFE00003;
+    *SMALL_SPRITE_CONTROLS[sprite_id] |= (((y+16)<<12) | ((x+16)<<2));
+}
+
+void shiftLargeSpriteControl(int sprite_id, uint32_t x, uint32_t y){
+    *LARGE_SPRITE_CONTROLS[sprite_id] &= 0xFFE00003;
+    *LARGE_SPRITE_CONTROLS[sprite_id] |= (((y+64)<<12) | ((x+64)<<2));
 }
 
 int rand(int high)

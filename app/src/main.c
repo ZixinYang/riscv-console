@@ -32,7 +32,8 @@ int main() {
     int step_size = 3;
     
     drawPellet();
-    SMALL_SPRITE_CONTROLS[0][0] = calcSmallSpriteControl(pellet_x,pellet_y,8,8,0);
+    // SMALL_SPRITE_CONTROLS[0][0] = calcSmallSpriteControl(pellet_x,pellet_y,8,8,0);
+    setSmallSpriteControl(0, calcSmallSpriteControl(pellet_x,pellet_y,8,8,0));
 
     int control_idx = 1;
     int cur_x = 0;
@@ -88,13 +89,19 @@ int main() {
                 budget += 3;
                 pellet_x = genRandom(512);
                 pellet_y = genRandom(288);
-                SMALL_SPRITE_CONTROLS[0][0] = calcSmallSpriteControl(pellet_x,pellet_y,8,8,0);
+                // SMALL_SPRITE_CONTROLS[0][0] = calcSmallSpriteControl(pellet_x,pellet_y,8,8,0);
+                shiftSmallSpriteControl(0, pellet_x, pellet_y);
                 center_x = pellet_x + 4;
                 center_y = pellet_y + 4;
             }
 
             alive = checkAlive(cur_x, cur_y, budget);
-            *SMALL_SPRITE_CONTROLS[control_idx] = calcSmallSpriteControl(cur_x, cur_y, 6, 6, 0);
+            if (*SMALL_SPRITE_CONTROLS[control_idx] == 0x0){
+                setSmallSpriteControl(control_idx, calcSmallSpriteControl(cur_x,cur_y,6,6,0));
+            }
+            else{
+                shiftSmallSpriteControl(control_idx, cur_x, cur_y);
+            }
             control_idx++;
             if (control_idx == budget){
                 control_idx = 1;
