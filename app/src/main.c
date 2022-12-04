@@ -6,19 +6,16 @@
 
 int checkAlive(int cur_x, int cur_y, int budget);
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget);
-void initSpriteControllers(void);
 void initSpriteData(void);
 void drawPellet(void);
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 volatile char *VIDEO_MEMORY = (volatile char *)(0x500FE800);
-volatile uint32_t *SMALL_SPRITE_CONTROLS[128];
 volatile uint8_t *SMALL_SPRITE_DATAS[128];
 
 int main() {
     int last_global = 42;
-    initSpriteControllers();
     initSpriteData();
     setGraphicsMode();
     // Set color to sprite palette
@@ -32,7 +29,6 @@ int main() {
     int step_size = 3;
     
     drawPellet();
-    // SMALL_SPRITE_CONTROLS[0][0] = calcSmallSpriteControl(pellet_x,pellet_y,8,8,0);
     setSmallSpriteControl(0, calcSmallSpriteControl(pellet_x,pellet_y,8,8,0));
 
     int control_idx = 1;
@@ -89,14 +85,13 @@ int main() {
                 budget += 3;
                 pellet_x = genRandom(512);
                 pellet_y = genRandom(288);
-                // SMALL_SPRITE_CONTROLS[0][0] = calcSmallSpriteControl(pellet_x,pellet_y,8,8,0);
                 shiftSmallSpriteControl(0, pellet_x, pellet_y);
                 center_x = pellet_x + 4;
                 center_y = pellet_y + 4;
             }
 
             alive = checkAlive(cur_x, cur_y, budget);
-            if (*SMALL_SPRITE_CONTROLS[control_idx] == 0x0){
+            if (getSmallSpriteControl(control_idx) == 0x0){
                 setSmallSpriteControl(control_idx, calcSmallSpriteControl(cur_x,cur_y,6,6,0));
             }
             else{
@@ -130,10 +125,12 @@ int main() {
 int checkAlive(int cur_x, int cur_y, int budget){
     int alive = 1;
     int x, y;
+    uint32_t sprite_control;
     if (cur_x != 0){
         for (int i = 1; i < budget; i++){
-            x = ((*SMALL_SPRITE_CONTROLS[i] >> 2) & 0x3FF) - SMALL_SPRITE_CTRL_OFFSET;
-            y = ((*SMALL_SPRITE_CONTROLS[i] >> 12) & 0x1FF) - SMALL_SPRITE_CTRL_OFFSET;
+            sprite_control = getSmallSpriteControl(i);
+            x = ((sprite_control >> 2) & 0x3FF) - SMALL_SPRITE_CTRL_OFFSET;
+            y = ((sprite_control >> 12) & 0x1FF) - SMALL_SPRITE_CTRL_OFFSET;
             if (x == cur_x & y == cur_y){
                 alive = 0;
                 break;
@@ -145,12 +142,6 @@ int checkAlive(int cur_x, int cur_y, int budget){
 
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget){
     return (cur_x < center_x + 10) & (cur_y < center_y + 10) & (cur_x > center_x - 10) & (cur_y > center_y - 10) & (budget <= 129);
-}
-
-void initSpriteControllers(){
-    for (int i = 0; i < 128; i++){
-        SMALL_SPRITE_CONTROLS[i] = (volatile uint32_t *)(0x50000000 + 0xFF214 + i * 4);
-    }
 }
 
 void initSpriteData(){

@@ -17,7 +17,9 @@ _start:
 
 .section .text, "ax"
 .global getTicks, getStatus, genRandom, setGraphicsMode, setTextMode, setColor, calcSmallSpriteControl, calcLargeSpriteControl, calcBackgroundControl
-.global setSmallSpriteControl, setLargeSpriteControl, shiftSmallSpriteControl, shiftLargeSpriteControl
+.global setSmallSpriteControl, setLargeSpriteControl, setBackgroundSpriteControl, shiftSmallSpriteControl, shiftLargeSpriteControl, 
+.global getSmallSpriteControl, getLargeSpriteControl, getBackgroundSpriteControl
+.global setSmallSpriteData, setLargeSpriteData, setBackgroundSpriteData
 getTicks:
     li a5, 0
     ecall
@@ -51,10 +53,31 @@ setSmallSpriteControl:
 setLargeSpriteControl:
     li a5, 10
     ecall
-shiftSmallSpriteControl:
+setBackgroundSpriteControl:
     li a5, 11
     ecall
-shiftLargeSpriteControl:
+shiftSmallSpriteControl:
     li a5, 12
+    ecall
+shiftLargeSpriteControl:
+    li a5, 13
+    ecall
+getSmallSpriteControl:
+    li a5, 14
+    ecall
+getLargeSpriteControl:
+    li a5, 15
+    ecall
+getBackgroundSpriteControl:
+    li a5, 16
+    ecall
+setSmallSpriteData:
+    li a5, 17
+    ecall
+setLargeSpriteData:
+    li a5, 18
+    ecall
+setBackgroundSpriteData:
+    li a5, 19
     ecall
 .end

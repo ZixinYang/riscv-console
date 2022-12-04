@@ -8,8 +8,16 @@ uint32_t calcLargeSpriteControl(uint32_t x, uint32_t y, uint32_t w, uint32_t h, 
 uint32_t calcBackgroundControl(uint32_t x, uint32_t y, uint32_t z, uint32_t p);
 void setSmallSpriteControl(int sprite_id, uint32_t addr);
 void setLargeSpriteControl(int sprite_id, uint32_t addr);
+void setBackgroundSpriteControl(int sprite_id, uint32_t addr);
 void shiftSmallSpriteControl(int sprite_id, uint32_t x, uint32_t y);
 void shiftLargeSpriteControl(int sprite_id, uint32_t x, uint32_t y);
+uint32_t getSmallSpriteControl(int sprite_id);
+uint32_t getLargeSpriteControl(int sprite_id);
+uint32_t getBackgroundSpriteControl(int sprite_id);
 void setGraphicsMode(void);
 void setTextMode(void);
 
+// Not yet completed
+void setSmallSpriteData(int sprite_id, int loc, int entry_id);
+void setLargeSpriteData(int sprite_id, int loc, int entry_id);
+void setBackgroundSpriteData(int sprite_id, int loc, int entry_id);
