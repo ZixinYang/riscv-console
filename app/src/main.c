@@ -25,10 +25,15 @@ int main() {
     initSpriteData();
     MODE_CTRL_REG[0] = 1;
     // Set color to sprite palette
-    volatile uint32_t *SPRITE_PALETTE = (volatile uint32_t *)(0x500FD000 + 1024 * 0);
+    volatile uint32_t *SPRITE_PALETTE = (volatile uint32_t *)(0x500FD000);
+    volatile uint32_t *BACKGROUND_SPRITE_PALETTE = (volatile uint32_t *)(0x500FC000);
     SPRITE_PALETTE[0] = 0x8000A65F;
     SPRITE_PALETTE[1] = 0x80FFFFFF;
-    SPRITE_PALETTE[2] = 0x80000000;
+    SPRITE_PALETTE[2] = 0xFFC19A6B;
+    BACKGROUND_SPRITE_PALETTE[0] = 0x80C19A6B;
+    volatile uint32_t *BACKGROUND_SPRITE_CONTROL = (volatile uint32_t *)(0x500FF100);
+    *BACKGROUND_SPRITE_CONTROL = ((0<<22) | ((288)<<12) | ((512)<<2)) | 0;
+    
     int pellet_x = 100;
     int pellet_y = 100;
     int center_x = pellet_x + 4;
