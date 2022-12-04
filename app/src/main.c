@@ -11,6 +11,7 @@ void initSpriteControllers(void);
 void initSpriteData(void);
 void drawPellet(void);
 int genRandom(int high);
+int getCoordinates(int idx);
 
 volatile uint32_t *MODE_CTRL_REG = (volatile uint32_t *)(0x500FF414);
 volatile int global = 42;
@@ -136,8 +137,7 @@ int checkAlive(int cur_x, int cur_y, int budget){
     int x, y;
     if (cur_x != 0){
         for (int i = 1; i < budget; i++){
-            x = ((*SMALL_SPRITE_CONTROLS[i] >> 2) & 0x3FF) - SMALL_SPRITE_CTRL_OFFSET;
-            y = ((*SMALL_SPRITE_CONTROLS[i] >> 12) & 0x1FF) - SMALL_SPRITE_CTRL_OFFSET;
+            x, y = getCoordinates(i);
             if (x == cur_x & y == cur_y){
                 alive = 0;
                 break;
@@ -145,6 +145,13 @@ int checkAlive(int cur_x, int cur_y, int budget){
         }
     }
     return alive;
+}
+
+int getCoordinates(int idx){
+    int x, y;
+    x = ((*SMALL_SPRITE_CONTROLS[idx] >> 2) & 0x3FF) - SMALL_SPRITE_CTRL_OFFSET;
+    y = ((*SMALL_SPRITE_CONTROLS[idx] >> 12) & 0x1FF) - SMALL_SPRITE_CTRL_OFFSET;
+    return x, y;
 }
 
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget){
