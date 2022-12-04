@@ -104,19 +104,21 @@ int main() {
         }
     }
     setTextMode();
-    VIDEO_MEMORY[0] = 'G';
-    VIDEO_MEMORY[1] = 'A';
-    VIDEO_MEMORY[2] = 'M';
-    VIDEO_MEMORY[3] = 'E';
-    VIDEO_MEMORY[4] = ' ';
-    VIDEO_MEMORY[5] = 'O';
-    VIDEO_MEMORY[6] = 'V';
-    VIDEO_MEMORY[7] = 'E';
-    VIDEO_MEMORY[8] = 'R';
-    VIDEO_MEMORY[9] = '!';
-    VIDEO_MEMORY[10] = '!';
-    VIDEO_MEMORY[11] = '!';
-    VIDEO_MEMORY[12] = '\0';
+    char *ptr = malloc(12);
+    ptr[0] = 'G';
+    ptr[1] = 'A';
+    ptr[2] = 'M';
+    ptr[3] = 'E';
+    ptr[4] = ' ';
+    ptr[5] = 'O';
+    ptr[6] = 'V';
+    ptr[7] = 'E';
+    ptr[8] = 'R';
+    ptr[9] = '!';
+    ptr[10] = '!';
+    ptr[11] = '!';
+    ptr[12] = '\0';
+    strcpy(VIDEO_MEMORY, ptr);
     return 0;
 }
 
