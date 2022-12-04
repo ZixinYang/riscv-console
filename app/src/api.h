@@ -16,6 +16,7 @@ uint32_t getLargeSpriteControl(int sprite_id);
 uint32_t getBackgroundSpriteControl(int sprite_id);
 void setGraphicsMode(void);
 void setTextMode(void);
+void printLine(char* string);
 
 // Not yet completed
 void setSmallSpriteData(int sprite_id, int loc, int entry_id);

@@ -57,6 +57,7 @@ void initSpriteDatas();
 uint32_t getSmallSpriteControl(int sprite_id);
 uint32_t getLargeSpriteControl(int sprite_id);
 uint32_t getBackgroundSpriteControl(int sprite_id);
+void printLine(char* string);
 
 static unsigned long int next = 1;
 
@@ -71,6 +72,8 @@ volatile uint32_t *BACKGROUND_SPRITE_CONTROLS[5];
 volatile uint8_t *SMALL_SPRITE_DATAS[128];
 volatile uint8_t *LARGE_SPRITE_DATAS[64];
 volatile uint8_t *BACKGROUND_SPRITE_DATAS[5];
+volatile char *VIDEO_MEMORY = (volatile char *)(0x500FE800);
+
 
 void init(void){
     uint8_t *Source = _erodata;
@@ -159,7 +162,16 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     else if (call == 16){
         return getBackgroundSpriteControl(a0);
     }
+    else if (call == 20){
+        printLine((char*)a0);
+    }
     return -1;
+}
+
+void printLine(char* string){
+    for(int i = 0; string[i] != '\0'; i++){
+        VIDEO_MEMORY[i] = string[i];
+    }
 }
 
 uint32_t getSmallSpriteControl(int sprite_id){
