@@ -18,7 +18,6 @@ int genRandom(int high);
 volatile uint32_t *MODE_CTRL_REG = (volatile uint32_t *)(0x500FF414);
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
-volatile char *VIDEO_MEMORY = (volatile char *)(0x500FE800);
 volatile uint8_t *SMALL_SPRITE_CONTROLS[128];
 volatile uint8_t *SMALL_SPRITE_DATAS[128];
 
@@ -111,19 +110,7 @@ int main() {
         }
     }
     setDisplayMode(DISPLAY_MODE_TEXT);
-    VIDEO_MEMORY[0] = 'G';
-    VIDEO_MEMORY[1] = 'A';
-    VIDEO_MEMORY[2] = 'M';
-    VIDEO_MEMORY[3] = 'E';
-    VIDEO_MEMORY[4] = ' ';
-    VIDEO_MEMORY[5] = 'O';
-    VIDEO_MEMORY[6] = 'V';
-    VIDEO_MEMORY[7] = 'E';
-    VIDEO_MEMORY[8] = 'R';
-    VIDEO_MEMORY[9] = '!';
-    VIDEO_MEMORY[10] = '!';
-    VIDEO_MEMORY[11] = '!';
-    VIDEO_MEMORY[12] = '\0';
+    linePrintf(0, "GAME OVER!!!");
     while(1);
     return 0;
 }
