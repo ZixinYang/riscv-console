@@ -68,6 +68,9 @@ volatile uint32_t *LARGE_SPRITE_CONTROLS[64];
 volatile uint32_t *BACKGROUND_SPRITE_CONTROLS[5];
 volatile char *VIDEO_MEMORY = (volatile char *)(0x500FE800);
 
+// threads
+typedef uint32_t *TContext;
+typedef void (*TEntry)(void*);
 
 void init(void){
     uint8_t *Source = _erodata;
@@ -160,6 +163,17 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     }
     else if (call == 18){
         setBackgroundColor(a0, a1, a2);
+    }
+    // init thread
+    else if (call == 19){
+        TContext r = InitContext((TContext) a0, (TEntry) a1, (void*) a2);
+        return r;
+    }
+    // context switch
+    else if (call == 20){
+        csr_disable_interrupts();
+        SwitchContext((TContext*) a0, (TContext) a1);
+        csr_enable_interrupts();
     }
     return -1;
 }

@@ -18,3 +18,8 @@ uint32_t getBackgroundSpriteControl(int sprite_id);
 void setGraphicsMode(void);
 void setTextMode(void);
 void printLine(char* string);
+// threads
+typedef uint32_t *TContext;
+typedef void (*TEntry)(void*);
+TContext InitContext(uint32_t *stacktop, TEntry entry, void *param);
+void SwitchContext(TContext *old, TContext new);

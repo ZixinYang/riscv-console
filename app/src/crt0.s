@@ -20,6 +20,7 @@ _start:
 .global setSmallSpriteControl, setLargeSpriteControl, setBackgroundSpriteControl, shiftSmallSpriteControl, shiftLargeSpriteControl, 
 .global getSmallSpriteControl, getLargeSpriteControl, getBackgroundSpriteControl
 .global printLine, setBackgroundColor
+.global InitContext, SwitchContext
 getTicks:
     li a5, 0
     ecall
@@ -76,6 +77,12 @@ printLine:
     ecall
 setBackgroundColor:
     li a5, 18
+    ecall
+InitContext:
+    li a5, 19
+    ecall
+SwitchContext:
+    li a5, 20
     ecall
 .end
 

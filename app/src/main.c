@@ -7,11 +7,19 @@
 int checkAlive(int cur_x, int cur_y, int budget);
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget);
 void drawPellet(void);
+void gameOver(void);
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 volatile uint8_t *small_sprite_data = (volatile uint8_t *)(0x500F4000);
 volatile uint32_t *background_sprite_control = (volatile uint32_t *)(0x500FF100);
+
+// threads
+typedef uint32_t *TContext;
+typedef void (*TEntry)(void*);
+uint32_t ThreadStack[128];
+TContext Mainthread;
+TContext Otherthread;
 
 int main() {
     int last_global = 42;
@@ -39,6 +47,9 @@ int main() {
     int alive = 1;
     uint32_t current_status = 0;
     uint32_t last_status = 0;
+
+    // threads
+    Otherthread = InitContext(ThreadStack + 128, gameOver, (void *)0);
 
     while (alive == 1) {
         global = getTicks();
@@ -106,8 +117,11 @@ int main() {
             last_status = current_status;
         }
     }
-    setTextMode();
-    printLine("GAME OVER!!!");
+    
+    /*setTextMode();
+    printLine("GAME OVER!!!");*/
+    // threads
+    SwitchContext(&Mainthread, Otherthread);
     return 0;
 }
 
@@ -139,4 +153,10 @@ void drawPellet(){
             small_sprite_data[(y<<4) + x] = ((x >= 3) & (x <= 5) & (y >= 0) & (y <= 8)) | ((x >= 2) & (x <= 6) & (y >= 3) & (y <= 5)) ? 1 : 2;
         }
     }
+}
+
+void gameOver(){
+    setTextMode();
+    printLine("GAME OVER!!!");
+    //SwitchContext(&Otherthread,Mainthread);
 }
