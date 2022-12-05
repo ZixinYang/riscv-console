@@ -59,6 +59,7 @@ void printLine(char* string);
 static unsigned long int next = 1;
 
 extern volatile int global;
+extern volatile int video_interrupt_count = 0;
 extern volatile uint32_t controller_status;
 volatile uint32_t *INT_PEND_REG = (volatile uint32_t *)(0x40000004);
 volatile uint32_t *MODE_CTRL_REG = (volatile uint32_t *)(0x500FF414);
@@ -100,6 +101,12 @@ void c_interrupt_handler(uint32_t mcause){
     global++;
     controller_status = CONTROLLER;
     initSpriteControllers();
+    // When video interrupt occurs, increase video interrupt count
+    if (((*INT_PEND_REG) & 0x2) > 0){
+        video_interrupt_count++;
+        // Clear VIP by setting 1
+        (*INT_PEND_REG) |= 0x2;
+    }
 }
 
 uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t call){
@@ -174,6 +181,9 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
         csr_disable_interrupts();
         SwitchContext((TContext*) a0, (TContext) a1);
         csr_enable_interrupts();
+    }
+    else if (call == 21){
+        return video_interrupt_count;
     }
     return -1;
 }

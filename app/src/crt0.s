@@ -20,7 +20,7 @@ _start:
 .global setSmallSpriteControl, setLargeSpriteControl, setBackgroundSpriteControl, shiftSmallSpriteControl, shiftLargeSpriteControl, 
 .global getSmallSpriteControl, getLargeSpriteControl, getBackgroundSpriteControl
 .global printLine, setBackgroundColor
-.global InitContext, SwitchContext
+.global InitContext, SwitchContext, getVideoInterruptCount
 getTicks:
     li a5, 0
     ecall
@@ -83,6 +83,9 @@ InitContext:
     ecall
 SwitchContext:
     li a5, 20
+    ecall
+getVideoInterruptCount:
+    li a5, 21
     ecall
 .end
 

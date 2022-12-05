@@ -52,7 +52,7 @@ int main() {
     Otherthread = InitContext(ThreadStack + 128, gameOver, (void *)0);
 
     while (alive == 1) {
-        global = getTicks();
+        global = getVideoInterruptCount();
         if(global != last_global){
             controller_status = getStatus();
             if (controller_status == 0x0){

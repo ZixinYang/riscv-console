@@ -23,3 +23,5 @@ typedef uint32_t *TContext;
 typedef void (*TEntry)(void*);
 TContext InitContext(uint32_t *stacktop, TEntry entry, void *param);
 void SwitchContext(TContext *old, TContext new);
+// Video Interrupt
+int getVideoInterruptCount();
