@@ -69,9 +69,6 @@ SECTIONS
         _esdata = .;        /* end of .data segment */
     } > RAM AT >FLASH       /* .sdata segment starts directly after the .text section in FLASH */
 
-    _heap = MAX(_esdata, MAX(_edata, _erodata));
-    PROVIDE( _stack = ORIGIN(RAM) + LENGTH(RAM) - 4096);
-    
     /* uninitialized data which is initialized to 0 upon after reset */
     .bss :
     {
