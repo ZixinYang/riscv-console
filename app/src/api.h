@@ -25,3 +25,4 @@ TContext InitContext(uint32_t *stacktop, TEntry entry, void *param);
 void SwitchContext(TContext *old, TContext new);
 // Video Interrupt
 int getVideoInterruptCount();
+int getCMDInterruptCount();

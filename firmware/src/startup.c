@@ -55,11 +55,15 @@ uint32_t getSmallSpriteControl(int sprite_id);
 uint32_t getLargeSpriteControl(int sprite_id);
 uint32_t getBackgroundSpriteControl(int sprite_id);
 void printLine(char* string);
-
+uint32_t srand(uint32_t new_seed);
 static unsigned long int next = 1;
+// threads
+typedef uint32_t *TContext;
+typedef void (*TEntry)(void*);
+TContext InitContext(uint32_t *stacktop, TEntry entry, void *param);
+void SwitchContext(TContext *old, TContext new);
 
 extern volatile int global;
-extern volatile int video_interrupt_count = 0;
 extern volatile uint32_t controller_status;
 volatile uint32_t *INT_PEND_REG = (volatile uint32_t *)(0x40000004);
 volatile uint32_t *MODE_CTRL_REG = (volatile uint32_t *)(0x500FF414);
@@ -68,6 +72,8 @@ volatile uint32_t *SMALL_SPRITE_CONTROLS[128];
 volatile uint32_t *LARGE_SPRITE_CONTROLS[64];
 volatile uint32_t *BACKGROUND_SPRITE_CONTROLS[5];
 volatile char *VIDEO_MEMORY = (volatile char *)(0x500FE800);
+volatile int video_interrupt_count = 0;
+volatile int cmd_interrupt_count = 0;
 
 // threads
 typedef uint32_t *TContext;
@@ -101,6 +107,11 @@ void c_interrupt_handler(uint32_t mcause){
     global++;
     controller_status = CONTROLLER;
     initSpriteControllers();
+    if (((*INT_PEND_REG) & 0x4) >> 2){
+        cmd_interrupt_count++;
+        // Clear VIP by setting 1
+        (*INT_PEND_REG) |= 0x4;
+    }
     // When video interrupt occurs, increase video interrupt count
     if (((*INT_PEND_REG) & 0x2) > 0){
         video_interrupt_count++;
@@ -117,6 +128,7 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
         return CONTROLLER;
     }
     else if (call == 2){
+        srand(video_interrupt_count);
         int r = rand(a0);
         return r;
     }
@@ -185,6 +197,9 @@ uint32_t c_system_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint3
     else if (call == 21){
         return video_interrupt_count;
     }
+    else if (call == 22){
+        return cmd_interrupt_count;
+    }
     return -1;
 }
 
@@ -240,10 +255,15 @@ void shiftLargeSpriteControl(int sprite_id, uint32_t x, uint32_t y){
     *LARGE_SPRITE_CONTROLS[sprite_id] |= (((y+64)<<12) | ((x+64)<<2));
 }
 
+uint32_t srand(uint32_t new_seed)
+{
+    next = (unsigned)new_seed & 0x7fffffffU;
+}
+
 int rand(int high)
 {
-    next = ((next * 214013L + 2531011L) >> 16) & 0x7fff;
-    return next % high;
+    next = (next * 1103515245U + 12345U) & 0x7fffffffU;
+    return (uint32_t)next % high;
 }
 
 uint32_t calcSmallSpriteControl(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t p){

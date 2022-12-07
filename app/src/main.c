@@ -3,6 +3,8 @@
 #include <string.h>
 #include "api.h"
 #define SMALL_SPRITE_CTRL_OFFSET 16
+#define DISPLAY_WIDTH 512
+#define DISPLAY_HEIGHT 288
 
 int checkAlive(int cur_x, int cur_y, int budget);
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget);
@@ -31,14 +33,14 @@ int main() {
     setBackgroundColor(0, 0, 0x80C19A6B);
     setBackgroundSpriteControl(0, calcBackgroundControl(0,0,0,0));
 
-    int pellet_x = 100;
-    int pellet_y = 100;
+    int pellet_x = genRandom(DISPLAY_WIDTH);
+    int pellet_y = genRandom(DISPLAY_HEIGHT);
     int center_x = pellet_x + 4;
     int center_y = pellet_y + 4;
     int step_size = 3;
     
     drawPellet();
-    setSmallSpriteControl(0, calcSmallSpriteControl(100,100,8,8,0));
+    setSmallSpriteControl(0, calcSmallSpriteControl(pellet_x,pellet_y,8,8,0));
 
     int control_idx = 1;
     int cur_x = 0;
@@ -47,12 +49,24 @@ int main() {
     int alive = 1;
     uint32_t current_status = 0;
     uint32_t last_status = 0;
+    const int snake_width = 6;
+    int cmd_interrupt = 0;
+    int current_cmd_interrupt;
 
     // threads
     Otherthread = InitContext(ThreadStack + 128, gameOver, (void *)0);
 
     while (alive == 1) {
-        global = getVideoInterruptCount();
+        global = getTicks();
+        current_cmd_interrupt = getCMDInterruptCount();
+        if (current_cmd_interrupt != cmd_interrupt){
+            pellet_x = genRandom(DISPLAY_WIDTH);
+            pellet_y = genRandom(DISPLAY_HEIGHT);
+            shiftSmallSpriteControl(0, pellet_x, pellet_y);
+            center_x = pellet_x + (snake_width/2);
+            center_y = pellet_y + (snake_width/2);
+            cmd_interrupt = current_cmd_interrupt;
+        }
         if(global != last_global){
             controller_status = getStatus();
             if (controller_status == 0x0){
@@ -78,7 +92,7 @@ int main() {
                 }
             }
             if(current_status & 0x4){
-                if( cur_y <= 287 - step_size){
+                if( cur_y <= DISPLAY_HEIGHT - 1 - step_size){
                     cur_y += step_size;
                 }
                 else{
@@ -86,7 +100,7 @@ int main() {
                 }
             }
             if(current_status & 0x8){
-                if(cur_x <= 511 - step_size){
+                if(cur_x <= DISPLAY_WIDTH - 1 - step_size){
                     cur_x += step_size;
                 }
                 else{
@@ -95,16 +109,16 @@ int main() {
             }
             if (checkGetPellet(cur_x, cur_y, center_x, center_y, budget)){
                 budget += 3;
-                pellet_x = genRandom(512);
-                pellet_y = genRandom(288);
+                pellet_x = genRandom(DISPLAY_WIDTH);
+                pellet_y = genRandom(DISPLAY_HEIGHT);
                 shiftSmallSpriteControl(0, pellet_x, pellet_y);
-                center_x = pellet_x + 4;
-                center_y = pellet_y + 4;
+                center_x = pellet_x + (snake_width/2);
+                center_y = pellet_y + (snake_width/2);
             }
 
             alive = checkAlive(cur_x, cur_y, budget);
             if (getSmallSpriteControl(control_idx) == 0x0){
-                setSmallSpriteControl(control_idx, calcSmallSpriteControl(cur_x,cur_y,6,6,0));
+                setSmallSpriteControl(control_idx, calcSmallSpriteControl(cur_x,cur_y,snake_width,snake_width,0));
             }
             else{
                 shiftSmallSpriteControl(control_idx, cur_x, cur_y);
@@ -117,10 +131,7 @@ int main() {
             last_status = current_status;
         }
     }
-    
-    /*setTextMode();
-    printLine("GAME OVER!!!");*/
-    // threads
+    // Thread
     SwitchContext(&Mainthread, Otherthread);
     return 0;
 }
@@ -158,5 +169,4 @@ void drawPellet(){
 void gameOver(){
     setTextMode();
     printLine("GAME OVER!!!");
-    //SwitchContext(&Otherthread,Mainthread);
 }
