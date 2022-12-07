@@ -5,9 +5,8 @@
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
 
-volatile uint8_t *small_sprite_data = (volatile uint8_t *)(SMALL_SPRITE_DATA_ADDRESS);
+volatile uint8_t *small_sprite_data = (volatile uint8_t *)(0x500F4000);
 volatile uint32_t *SMALL_SPRITE_CONTROLS[128];
-volatile char *VIDEO_MEMORY = (volatile char *)(TEXT_DATA_ADDRESS);
 
 void initSpriteControllers(void);
 void drawPellet(void);
@@ -26,7 +25,7 @@ int main() {
     setSpritePalette(0, 1, 0x80FFFFFF);
     setSpritePalette(0, 2, 0xFFC19A6B);
     setBackgroundPalette(0, 0, 0x80C19A6B);
-    setBackgroundControl(0, 0, 0, 0, 0);
+    setBackgroundControl(0, 0, 0, 0);
 
     int pellet_x = 100;
     int pellet_y = 100;
@@ -35,7 +34,7 @@ int main() {
     int step_size = 3;
 
     drawPellet();
-    *SMALL_SPRITE_CONTROLS[0] = (volatile uint32_t *)calcSmallSpriteControl(pellet_x, pellet_y, 0, 8, 8, 0);
+    *SMALL_SPRITE_CONTROLS[0] = calcSmallSpriteControl(merge_arg(pellet_x, pellet_y), merge_arg(8, 8), 0);
 
     int control_idx = 1;
     int cur_x = 0;
@@ -89,8 +88,8 @@ int main() {
             }
             if (checkGetPellet(cur_x, cur_y, center_x, center_y, budget)) {
                 budget += 3;
-                pellet_x = genRandom(512);
-                pellet_y = genRandom(288);
+                pellet_x = Rand_sys() % 512;
+                pellet_y = Rand_sys() % 288;
                 *SMALL_SPRITE_CONTROLS[0] &= 0xFFE00003;
                 *SMALL_SPRITE_CONTROLS[0] |= (((pellet_y+16)<<12) | ((pellet_x+16)<<2));
                 center_x = pellet_x + 4;
@@ -98,13 +97,7 @@ int main() {
             }
 
             alive = checkAlive(cur_x, cur_y, budget);
-            if (*SMALL_SPRITE_CONTROLS[control_idx] == 0x0) {
-                *SMALL_SPRITE_CONTROLS[control_idx] = calcSmallSpriteControl(cur_x, cur_y, 0, 6, 6, 0);
-            }
-            else {
-                *SMALL_SPRITE_CONTROLS[control_idx] &= 0xFFE00003;
-                *SMALL_SPRITE_CONTROLS[control_idx] |= (((cur_y+16)<<12) | ((cur_x+16)<<2));
-            }
+            *SMALL_SPRITE_CONTROLS[control_idx] = calcSmallSpriteControl(merge_arg(cur_x, cur_y), merge_arg(6, 6), 0);
             control_idx++;
             if (control_idx == budget) {
                 control_idx = 1;
@@ -122,7 +115,7 @@ int main() {
 
 void initSpriteControllers() {
     for (int i = 0; i < 128; i++){
-        SMALL_SPRITE_CONTROLS[i] = (volatile uint32_t *)(SMALL_SPRITE_CONTROL_ADDRESS + i * 4);
+        SMALL_SPRITE_CONTROLS[i] = (volatile uint32_t *)(0x500FF214 + i * 4);
     }
 }
 
@@ -136,12 +129,6 @@ void drawPellet() {
 
 int checkGetPellet(int cur_x, int cur_y, int center_x, int center_y, int budget) {
     return (cur_x < center_x + 10) & (cur_y < center_y + 10) & (cur_x > center_x - 10) & (cur_y > center_y - 10) & (budget <= 129);
-}
-
-int genRandom(int high) {
-    static unsigned long int next = 1;
-    next = ((next * 214013L + 2531011L) >> 16) & 0x7fff;
-    return next % high;
 }
 
 int checkAlive(int cur_x, int cur_y, int budget) {
