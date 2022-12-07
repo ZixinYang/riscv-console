@@ -19,7 +19,6 @@ int main() {
     int last_global = global;
 
     setVideoMode(GRAPHICS_MODE);
-
     initSpriteControllers();
     setSpritePalette(0, 0, 0x8000A65F);
     setSpritePalette(0, 1, 0x80FFFFFF);
