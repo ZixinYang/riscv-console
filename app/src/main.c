@@ -33,8 +33,8 @@ int main() {
     setBackgroundColor(0, 0, 0x80C19A6B);
     setBackgroundSpriteControl(0, calcBackgroundControl(0,0,0,0));
 
-    int pellet_x = genRandom(DISPLAY_WIDTH);
-    int pellet_y = genRandom(DISPLAY_HEIGHT);
+    int pellet_x = 100;
+    int pellet_y = 100;
     int center_x = pellet_x + 4;
     int center_y = pellet_y + 4;
     int step_size = 3;
