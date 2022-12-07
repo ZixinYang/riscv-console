@@ -4,7 +4,9 @@
 The designed API is aim for the game developer to develop the gaming environment easier. Our testing game is the Snake Game. The Snake game combined the standard input and output system such as mouse, keyboard, and monitor. We design various API functions for these kernel operations, and we also have some API functions like malloc and random number generator to allocate OS resource and generate random numbers.
 
 ## Table of Contents
-
+- [Table of Contents](#table-of-contents)
+- [Getting Started](#getting-started)
+- [API List](#api-list)
 ## Getting Started
 The OS is based on RISC-V instruction sets. Before you run the simulator, make sure you have downloaded the X11 display, Docker Engine, git bash on Windows or shell on Linux.
 
