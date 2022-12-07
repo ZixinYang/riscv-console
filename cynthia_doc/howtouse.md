@@ -90,8 +90,8 @@ No return values
 `void setBackgroundSpriteControl(int sprite_id, uint32_t addr);`
 #### __Parameters__
 `uint32_t x` - x position of the sprite\
-`uint32_t y` - y posision of the sprite\
-`uint32_t z` - \
+`uint32_t y` - y position of the sprite\
+`uint32_t z` - z position of the sprite\
 `uint32_t w` - width of the sprite\
 `uint32_t h` - height of the sprite\
 `uint32_t p` - palette ID
