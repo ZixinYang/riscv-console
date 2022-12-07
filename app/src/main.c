@@ -117,11 +117,12 @@ int main() {
     return 0;
 }
 
-int genRandom(int high)
-{
+
+int genRandom(int high){
     static unsigned long int next = 1;
-    next = ((next * 214013L + 2531011L) >> 16) & 0x7fff;
-    return next % high;
+    next = (unsigned)getTicks() & 0x7fffffffU;
+    next = (next * 1103515245U + 12345U) & 0x7fffffffU;
+    return (uint32_t)next % high;
 }
 
 int checkAlive(int cur_x, int cur_y, int budget){
